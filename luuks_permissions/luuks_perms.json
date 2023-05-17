@@ -1,0 +1,19 @@
+{
+    "ranks": {
+        "Default": 0,
+        "EM": 5,
+        "Admin": 10
+    },
+    "perms": {
+        "luuk-bepis": "Admin",
+        "Ender345": "Admin",
+        "Firerock": "Admin",
+        "ThePhantomDriver": "EM",
+        "LordJuvenile": "EM",
+        "bowtie_dylan": "EM",
+        "InitialYeet": "EM",
+        "dootan": "EM",
+        "The_Racc": "EM",
+        "Spaghetti806": "EM"
+    }
+}

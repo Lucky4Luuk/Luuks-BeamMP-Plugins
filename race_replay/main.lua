@@ -1,3 +1,9 @@
+-- Simple server-sided replay recorder, to be used with my custom replay viewer.
+-- NOTE: Do NOT use right now! It keeps track of ALL events and keeps writing them ALL to a file.
+--       This might result in poor server performance!
+-- TODO: Append latest changes to replay file instead of writing them all at once.
+-- TODO: Track onVehicleReset.
+
 local is_recording = false
 local replay_ms = 40 -- 40ms between replay ticks = 25fps replay
 
@@ -88,25 +94,33 @@ function StopRecording()
 end
 
 function ReplayCommandHandler(sender_id, sender_name, message)
-    if message == "/startreplay" then
-        if is_recording then
-            MP.SendChatMessage(sender_id, "Replay has already been started!")
-        else
-            MP.SendChatMessage(-1, "Replay started by " .. sender_name)
-            StartRecording()
-        end
-        return 1
-    elseif message == "/stopreplay" then
-        if is_recording then
-            MP.SendChatMessage(-1, "Replay stopped by " .. sender_name)
-            StopRecording()
-        else
-            MP.SendChatMessage(sender_id, "Replay wasn't started!")
-        end
-        return 1
-    else
-        return 0
+    local fut = MP.TriggerGlobalEvent("LuuksPerms_CheckPermission", sender_name)
+    while not fut:IsDone() do
+        MP.Sleep(100)
     end
+    local results = fut:GetResults()
+    for k, v in pairs(results) do results[k] = Util.JsonDecode(Util.JsonEncode(v)) end
+    local rank_info = results[1]
+    if rank_info.level > 2 then
+        if message == "/startreplay" then
+            if is_recording then
+                MP.SendChatMessage(sender_id, "Replay has already been started!")
+            else
+                MP.SendChatMessage(-1, "Replay started by " .. sender_name)
+                StartRecording()
+            end
+            return 1
+        elseif message == "/stopreplay" then
+            if is_recording then
+                MP.SendChatMessage(-1, "Replay stopped by " .. sender_name)
+                StopRecording()
+            else
+                MP.SendChatMessage(sender_id, "Replay wasn't started!")
+            end
+            return 1
+        end
+    end
+    return 0
 end
 
 -- TODO: Every x ticks, save the data to a file

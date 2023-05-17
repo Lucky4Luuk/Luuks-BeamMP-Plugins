@@ -4,10 +4,8 @@
 -- my friends only need to have 1 config file to manage
 -- permissions for all my plugins
 
--- TODO: Use onFileChanged to track changes in the permissions file and
---       automatically load the new config
-
-local config_path = "Resources/Server/luuks_permissions/luuks_perms.json"
+local config_path = "Resources/Server/luuks_permissions/config/luuks_perms.json"
+local config_path_dir_only = "Resources/Server/luuks_permissions/config/"
 
 local ranks = {} -- ranks["rank"] = level
 local perms = {} -- perms["name"] = "rank"
@@ -43,11 +41,13 @@ function LuuksPerms_CheckPermissionID(player_id)
     return LuuksPerms_CheckPermission(MP.GetPlayerName(player_id))
 end
 
-function InitHandler()
+local function LoadConfig()
     -- Create a default config file if it does not yet exist
     if not FS.IsFile(config_path) then
         print("Config file missing or somehow a directory! Recreating it...")
         if FS.Exists(config_path) then FS.Remove(config_path) end
+        if FS.IsFile(config_path_dir_only) then FS.Remove(config_path_dir_only) end
+        if not FS.Exists(config_path_dir_only) then FS.CreateDirectory(config_path_dir_only) end
         local file = io.open(config_path, "w")
         local empty_conf = {}
 
@@ -76,6 +76,18 @@ function InitHandler()
     end
 end
 
+function FileChangedHandler(path)
+    path = path:gsub("\\", "/")
+    if path == config_path then
+        print("Changed detected in permission config file, reloading...")
+        LoadConfig()
+    end
+end
+
+function InitHandler()
+    LoadConfig()
+end
+
 function CommandHandler(sender_id, sender_name, message)
     local split = strsplit(message, " ")
     if split[1] == "/rank" then
@@ -92,3 +104,4 @@ MP.RegisterEvent("LuuksPerms_CheckPermissionID", "LuuksPerms_CheckPermissionID")
 
 MP.RegisterEvent("onInit", "InitHandler")
 MP.RegisterEvent("onChatMessage", "CommandHandler")
+MP.RegisterEvent("onFileChanged", "FileChangedHandler")

@@ -3,6 +3,7 @@
 --       This might result in poor server performance!
 -- TODO: Append latest changes to replay file instead of writing them all at once.
 -- TODO: Track onVehicleReset.
+-- TODO: Support /marker to add Marker events, so the RC can easily go back to something they marked.
 
 local is_recording = false
 local replay_ms = 40 -- 40ms between replay ticks = 25fps replay

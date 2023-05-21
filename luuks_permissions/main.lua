@@ -2,7 +2,11 @@
 -- The goal is to have a generic permission system that
 -- I can modify to work for whatever I want, and so
 -- my friends only need to have 1 config file to manage
--- permissions for all my plugins
+-- permissions for all my plugins.
+
+-- Features:
+-- : Customizable ranks with custom permission level
+-- : Easily modifiable permission file, with hotreloading!
 
 local config_path = "Resources/Server/luuks_permissions/config/luuks_perms.json"
 local config_path_dir_only = "Resources/Server/luuks_permissions/config/"
@@ -26,10 +30,7 @@ function strsplit(inputstr, sep)
     return t
 end
 
-function LuuksPerms_Installed() return true end
-
 function LuuksPerms_CheckPermission(player_name)
-    player_name = Util.JsonDecode(Util.JsonEncode({name=player_name})).name
     local result = {}
     result.rank = perms[player_name] or "Default"
     result.level = ranks[result.rank] or 0
@@ -37,7 +38,6 @@ function LuuksPerms_CheckPermission(player_name)
 end
 
 function LuuksPerms_CheckPermissionID(player_id)
-    player_id = Util.JsonDecode(Util.JsonEncode({id=player_id})).id
     return LuuksPerms_CheckPermission(MP.GetPlayerName(player_id))
 end
 
@@ -98,7 +98,7 @@ function CommandHandler(sender_id, sender_name, message)
     end
 end
 
-MP.RegisterEvent("LuuksPerms_Installed", "LuuksPerms_Installed")
+-- Register for global use, in case that's useful after BeamMP fixes the global event issues
 MP.RegisterEvent("LuuksPerms_CheckPermission", "LuuksPerms_CheckPermission")
 MP.RegisterEvent("LuuksPerms_CheckPermissionID", "LuuksPerms_CheckPermissionID")
 
